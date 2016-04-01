@@ -4,9 +4,10 @@ author: "Emile Naude, Anneke Speijers, Harihara Subramanyam Sreenivasan, Max van
 date: "April 1, 2016"
 header-includes:
    - \usepackage{graphicx}
-output: pdf_document
+output: html_document
 subtitle: Stochastic Models and Optimization Project
 ---
+
 The secretary problem is a classic optimal stopping problem that has a long history in mathematics literature. Known also as the marriage problem, the dowry problem and the best choice problem, amongst others, it goes as follows. A finite number of items is presented one-by-one in random order to an observer. After each item has been presented, the observer ranks all items that have been presented so far in terms of desirability. A decision must be made to accept or reject an item immediately after it has been presented and the process stops once an item is accepted. The aim is to determine an optimal stopping rule that maximises the probability of accepting the most desirable item. 
 
 Many variations to the standard problem exist and in this project we consider some of them. We contexualise the problem by imagining that we work for a hiring consultancy. Our goal is to determine the optimal stopping policy for offering a job to the best candidate or candidates. The following assumptions are common to all of the scenarios we discuss:
@@ -151,7 +152,7 @@ Using the above rule, the algorithm for the optimal strategy is as follows:
 
 Using this approach, we will pick the best candidate with a probability of 36.79 $\%$, . 
 
-``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.width=6.5, fig.height=3.6}
+``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
 #load packages
 if ( !require(ggplot2) ) install.packages("ggplot2"); library(ggplot2)
 if ( !require(reshape) ) install.packages("reshape"); library(reshape)
@@ -229,10 +230,11 @@ ggplot( data=df, aes(x=N, y=prob) ) +
            axis.title.y = element_text(size=10, margin=margin(l=10, r=10)),
            axis.text.y  = element_text(size=8) )
 ```
+
 Figure 1. The algorithm was run 5000 times for different values of N. Clearly with N=1, the best candidate is always picked. The graph above shows that as N is increased above one, the probability of picking the best candidate decreases to a limit of approximately 1/e, represented by the dashed black line.
 
 
-``` {r, echo=FALSE, fig.align='center', fig.height=3.75, fig.width=6.5}
+``` {r, echo=FALSE, fig.align='center'}
 # 2. plot evolution of probabilities with increasing no. of iters
 # get data ready for plotting
 prob_best_evo <- as.data.frame(prob_best_evo)
@@ -253,7 +255,9 @@ ggplot( df, aes(simulations, value) ) +
            axis.title.y = element_text(size=10, margin=margin(l=10, r=10)),
            axis.text.y  = element_text(size=8) )
 ```
+
 Figure 2. The above graph shows the evolution of the proportion of times you get a Win for different values of N. For few simulations, the results have high variance and the proportion of times you Win may not even be close to the expected values shown in Figure 1. An equilibrium is reached after somewhere around 750 simulations. 
+
 
 # 2) One from the best $k$ out of $N$ 
 
@@ -420,7 +424,7 @@ $$s_{k} = \left(\sqrt[k - 1]{\frac{k}{2k - 1}}\right)*N$$
 
 3) Moving from state $m = 1$ use that stopping rule that after $s_{i}$ for $i \geq 1$, you will pick a candidate only if they are better than at least one of the $i$ best seen before. If no such candidate can be picked until $N$, then you hire the $N^{th}$ candidate. 
 
-``` {r, echo=FALSE, fig.width=7}
+``` {r, echo=FALSE}
 n           <- 10000
 N           <- 100
 k_values    <- seq(1,10,1)
@@ -507,8 +511,9 @@ ggplot( data=df, aes(x=k, y=prob) ) +
            axis.title.y = element_text(size=10, margin=margin(l=10, r=10)),
            axis.text.y  = element_text(size=8) )
 ```
+
 Figure 3. The above graph shows the probability of a Win for picking one of the best k candidates out of the total of 100. For k = 1, the probability is the same as that produced from the solution to the standard secretary problem. As k increases, the probability of a Win increases to 1. Note that these values are larger than asymptotic values since $\widetilde{p}_{N}^{k}$ is the expected probability of sucess as $N \rightarrow \infty$. 
-$\newline$
+
 
 # 3) The best k out of N 
 
@@ -540,7 +545,7 @@ The probability of success using this method as $N \rightarrow \infty$ has been 
   
 $$\Phi(m) = \frac{1}{ek}$$
 
-$\newline$
+
 ``` {r, echo=FALSE}
 n           <- 10000
 N_values    <- 100
@@ -626,7 +631,6 @@ ggplot( data=df, aes(x=k, y=prob) ) +
 
 Figure 4. The graph above displays the asymptotic (after 10,000 simulations) probability of a Win for N=100 and varying values of k. $\Phi(m)$ is represented by the dashed black line. The graph demonstrates that for a particular N, the probability of a Win decreases exponentially with increasing k.
 
-$\pagebreak$
 
 # References 
 
