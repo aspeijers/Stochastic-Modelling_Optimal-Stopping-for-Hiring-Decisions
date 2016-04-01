@@ -1,0 +1,644 @@
+---
+title: "Hiring Decisions based on Optimal Stopping Policies"
+author: "Emile Naude, Anneke Speijers, Harihara Subramanyam Sreenivasan, Max van Esso"
+date: "April 1, 2016"
+header-includes:
+   - \usepackage{graphicx}
+output: pdf_document
+subtitle: Stochastic Models and Optimization Project
+---
+The secretary problem is a classic optimal stopping problem that has a long history in mathematics literature. Known also as the marriage problem, the dowry problem and the best choice problem, amongst others, it goes as follows. A finite number of items is presented one-by-one in random order to an observer. After each item has been presented, the observer ranks all items that have been presented so far in terms of desirability. A decision must be made to accept or reject an item immediately after it has been presented and the process stops once an item is accepted. The aim is to determine an optimal stopping rule that maximises the probability of accepting the most desirable item. 
+
+Many variations to the standard problem exist and in this project we consider some of them. We contexualise the problem by imagining that we work for a hiring consultancy. Our goal is to determine the optimal stopping policy for offering a job to the best candidate or candidates. The following assumptions are common to all of the scenarios we discuss:
+
+1) All candidates have fulfilled the prerequisites for the position. The worst will still fulfill the basic requirements but nothing more. The best possible candidate is such that the company will substantially benefit from the hire. 
+
+2) The candidates are evaluated on various quantitative scales which are combined to arrive at a single score. No two candidates have the same score. This allows for them to be ranked.
+
+3) Candidates have offers from other companies so we must decide to offer them the job or reject them immediately after the interview. 
+
+3) A rejected candidate cannot be recalled.
+
+4) The position(s) must be filled. If we get to the end of the process without offering the job to any candidate, we must offer it to the last candidate(s).
+
+5) Candidates offered a position are obliged to take it.
+
+
+# The Three Scenarios
+
+1) We wish to pick the best out of $N$ candidates. 
+
+2) We wish to pick one of the best $k$ candidates out of $N$.
+
+3) We wish to pick all of the best $k$ candidates out of $N$. 
+
+# 1) The best out of $N$
+
+This is the standard secretary problem, whereby we have N candidates and we want to maximise our probability of choosing the best one. The optimal strategy is known to be of the form: Let a certain number of candidates pass, only observing their scores. After some critical number of candidates, pick the first one that has a higher score than those already observed. Our goal is to determine this critical number. Our methodology follows that put forward by Beckmann (1990) [1].
+
+Let us start by defining the following terminology:
+
+Win ~ choosing the best among all candidates.\
+Value ~ the expected probability of winning.\
+Viable Candidate ~ any candidate who is the best so far.\
+
+
+The dynamic program can be defined as follows:
+
+Let $m$ be the number of candidates seen and $n$ be the number of candidates that are remaining, such that,
+
+$$m + n = N$$
+
+$m$ is the variable that represents the state of our dynamic program. 
+
+The cost associated with this problem can be viewed as the cost of not hiring the best candidate. Therefore the cost increases over time with reduction in choices. The constraint is that one of these candidates must be hired.
+
+We define two value functions:
+
+1) $v_{m}$ is the value when $m$ candidates have been interviewed and the $m^{th}$ candidate has not been chosen. 
+
+2) $u_{m}$ is the value when $m$ candidates have been observed and $m$ is the best candidate so far.
+
+When the last observed candidate is not viable, then an optimal policy requires that the search be continued so that $v_{m}$ applies. A decision rule is needed for when the last candidate is a viable candidate. This rule can only depend on the state variable $m$ and the total number of candidates $N$.
+
+The value functions update recursively in the following manner:
+
+1) $v_{m} = \frac{m}{m + 1} v_{m+1} + \frac{1}{m + 1} u_{m + 1}$
+
+Given that the $m^{th}$ candidate is not chosen, the $m+1^{th}$ candidate will be either a viable candidate with probability ${\frac{1}{m+1}}$, or not with probability ${\frac{m}{m+1}}$. If not, the value will become $v_{m+1}$, but if he/she is a viable candidate the value will become ${u_{m+1}}$. 
+
+2) $u_{m} = max[\frac{m}{N}, v_{m}]$
+
+Given that the $m^{th}$ candidate is a viable candidate, there is a decision to choose this candidate, or to continue. If chosen, the value is $\frac{m}{N}$ (just the probability that the chosen one is best among all $N$). If not chosen, the value is $v_{m}$, as already established. \
+
+Starting with $m = N$, we will solve the above equations recursively. By definition $v_{N} = 0$ and $u_{N} = 1$. 
+
+At $m = N - 1$ 
+
+$$v_{N -1} = \frac{N - 1}{N}v_{N} + \frac{1}{N}u_{N}$$
+
+$$v_{N - 1} = \frac{1}{N}$$
+
+using this, we get 
+
+$$u_{N-1} = \max\left[\frac{N - 1}{N}, v_{N - 1}\right]$$
+
+$$u_{N - 1} = \frac{N - 1}{N}$$
+
+At $m = N - 2$
+
+$$v_{N - 2} = \frac{N - 2}{N - 1}.v_{N - 1} + \frac{1}{N - 1}.u_{N - 1}$$
+
+   $$ = \frac{N-2}{N-1}.\frac{1}{N} + \frac{1}{N-1}.\frac{N-1}{N}$$
+
+$$ = \frac{1}{N}\left(\frac{N-2}{N-1} + \frac{N-2}{N-2}\right)$$
+
+   $$ = \frac{N-2}{N}.\left(\frac{1}{N-2} + \frac{1}{N-1}\right)$$
+
+using, $v_{N-1}$, we get 
+
+$$u_{N-2} = \max\left[\frac{N-2}{N}, \frac{N-2}{M}\left(\frac{1}{N-2} + \frac{1}{N-1}\right)\right]$$
+
+$$u_{N-2} = \frac{N-2}{N}\max\left(1,\frac{1}{N-2} + \frac{1}{N-1}\right)$$
+
+We can generalize this pattern to the form,
+
+$$v_{m} = \frac{m}{N}\left(\frac{1}{m} + \frac{1}{m+1} + ... + \frac{1}{N-1}\right)$$
+
+and
+
+$$u_{m} = \frac{m}{N}\max\left[1,\frac{1}{m} + \frac{1}{m+1} + ... +\frac{1}{N-1}\right]$$
+
+Let $m^{*}$ be the critical candidate. 
+
+At this state, the values of $v$ and $u$ will be as follows:
+
+$$u_{opt} = v_{opt} = v_{m^{*} - 1} $$
+
+$$v_{opt} = v_{m^{*} - 1} = \frac{m^{*} - 1}{m^{*}}v_{m^{*}} + \frac{1}{m^{*}}\max\left[\frac{m^{*}}{N}, v_{m^{*}}\right]$$
+
+$$v_{opt} = v_{m^{*} - 1} = \frac{m^{*} - 1}{m^{*}}.\frac{m^{*}}{N}\left(\frac{1}{m^{*}} + ... + \frac{1}{N+1}\right) + \frac{1}{m^{*}}.\frac{m^{*}}{N}$$
+
+$$v_{opt} = \frac{m^{*} - 1}{N}\left(\frac{1}{m^{*} - 1} + \frac{1}{m^{*}} + \frac{1}{m^{*} + 1} + ...... \frac{1}{N-1}\right) = u_{opt}$$
+
+Our goal now is to approximate $m^{*}$ and determine the optimal stopping policy for a sufficiently large N. 
+
+From our definitions of $v_{m}$ and $u_{m}$, it can be determined that no secretary who is best so far will be accepted as long as 
+
+$$\sum_{i = m}^{N-1} \frac{1}{i} < 1$$
+
+The first viable candidate will be chosen when $m \geq m^{*}$. It follows that $m^{*}$ is the solution of:
+
+$$\sum_{i = m^{*}}^{N-1} \frac{1}{i} \leq 1 < \sum_{i = m^{*} - 1}^{N-1} \frac{1}{i}$$
+
+For the determination of $m^{*}$, we observe that 
+
+$$\sum_{i = m}^{N-1} \frac{1}{i} < \int_{m}^{N} \frac{dx}{x}$$
+
+The approximate solution for $m^{*}$ is therefore 
+
+$$\sum_{i = m}^{N-1} \frac{1}{i} = \int_{m^{*}}^{N} \frac{dx}{x} = \log(N) - \log(m) = 1$$
+
+Which gives us:
+
+$$m^{*} \approx \frac{N}{e}$$
+
+Using the above rule, the algorithm for the optimal strategy is as follows:
+
+1) Based on the N candidates in the particular case, derive the approximation for $m^{*}$ and round it up to the nearest integer. 
+2) Up until and including state $m^{*}-1$, interview all the candidates and keep in mind the best candidate that you have interviewed. 
+3) From state $m^{*}$ onwards, pick the first viable candidate. 
+
+Using this approach, we will pick the best candidate with a probability of 36.79 $\%$, . 
+
+``` {r, echo=FALSE, message=FALSE, warning=FALSE, fig.align='center', fig.width=6.5, fig.height=3.6}
+#load packages
+if ( !require(ggplot2) ) install.packages("ggplot2"); library(ggplot2)
+if ( !require(reshape) ) install.packages("reshape"); library(reshape)
+
+################## Picking the best candidate out of N ########################
+## run algorithm n times and count average number of Wins for different N's.
+n           <- 5000
+N_values    <- seq(1,20, 1)
+rank_chosen <- matrix( nrow=n, ncol=length(N_values) )
+
+for ( j in 1:length(N_values) ) {
+    
+    # total number of candidates
+    N <- N_values[j]
+    
+    # calculate m*
+    m_crit <- N/exp(1)
+    
+    for (i in 1:n) {
+        # randomise the order in which candidates are interviewed
+        # value = rank of candidate, where 1 is the best. 
+        candidates <- sample(N, N)
+        
+        # candidates interviewed after m*-1th candidate
+        considered_candidates   <- candidates[ceiling(m_crit):N]
+        
+        # score of best candidate up until and including m*-1th candidate
+        if ( m_crit < 1) {
+            best_so_far <- NULL
+        } else {
+            best_so_far <- min( candidates[1:floor(m_crit)] )
+        }
+        
+        # if m_crit is less than 1 (N=1 or N=2) then take the first candidate 
+        if ( is.null(best_so_far) ) {
+            rank_chosen[i,j] <- considered_candidates[1]
+            
+        # if a viable option exists in remaining candidates
+        } else if ( min(considered_candidates) < best_so_far) {
+            cand_no <- min( which(considered_candidates < best_so_far) )
+            rank_chosen[i,j] <- considered_candidates[cand_no]  
+            
+        # if no viable option exists, must employ final candidate
+        } else {
+            rank_chosen[i,j] <- candidates[N]
+        }
+        
+    }  
+    
+}
+
+# plot showing how many times we need to carry out the hiring process to really 
+# reach the expected value
+prob_best_evo <- matrix(nrow=n, ncol=N)
+prob_best_evo[1,] <-  ifelse( rank_chosen[1,]==1, 1, 0)
+for (t in 2:n) {
+    prob_best_evo[t,] <- apply(rank_chosen[1:t,], 2, function(x) sum(x==1)/t)
+}
+
+### plots
+# 1. plot proportion of Wins after 1000 iters for different N's
+df <- data.frame(N = N_values, prob = prob_best_evo[n,])
+ggplot( data=df, aes(x=N, y=prob) ) + 
+    geom_line( colour="coral", size=1 ) + 
+    geom_point( colour="coral", size=2.5 ) +
+    geom_hline( yintercept = 1/exp(1), linetype="dashed", size=0.6) +
+    scale_x_continuous( breaks=seq(0, 20, 5)) +
+    scale_y_continuous( breaks=seq(0, 1, 0.2), 
+                        name="proportion of times best candidate was picked" ) +
+    coord_cartesian( ylim=c(0, 1) ) +
+    ggtitle( "Best of N\n(5000 simulations)" ) +
+    theme( plot.title = element_text(size=12, margin=margin(b=10)),
+           axis.title.x = element_text(size=10, margin=margin(b=0,t=10)),
+           axis.text.x  = element_text(size=8),
+           axis.title.y = element_text(size=10, margin=margin(l=10, r=10)),
+           axis.text.y  = element_text(size=8) )
+```
+Figure 1. The algorithm was run 5000 times for different values of N. Clearly with N=1, the best candidate is always picked. The graph above shows that as N is increased above one, the probability of picking the best candidate decreases to a limit of approximately 1/e, represented by the dashed black line.
+
+
+``` {r, echo=FALSE, fig.align='center', fig.height=3.75, fig.width=6.5}
+# 2. plot evolution of probabilities with increasing no. of iters
+# get data ready for plotting
+prob_best_evo <- as.data.frame(prob_best_evo)
+names(prob_best_evo) <- seq(1, N)
+prob_best_evo <- cbind(simulations = 1:n, prob_best_evo )
+df <- melt(prob_best_evo[1:1000,1:11], id.vars = "simulations")
+
+# plot evolution
+ggplot( df, aes(simulations, value) ) +
+    geom_line( aes(colour = variable) ) +
+    geom_hline( yintercept = 1/exp(1), linetype="dashed" ) +
+    scale_colour_discrete( name ="No. candidates" ) +
+    ylab( "proportion of times best candidate picked" ) +
+    ggtitle( "Best of N: probability of a Win evolution" ) +
+    theme( plot.title = element_text(size=12, margin=margin(b=10, t=20)),
+           axis.title.x = element_text(size=10, margin=margin(b=0,t=10)),
+           axis.text.x  = element_text(size=8),
+           axis.title.y = element_text(size=10, margin=margin(l=10, r=10)),
+           axis.text.y  = element_text(size=8) )
+```
+Figure 2. The above graph shows the evolution of the proportion of times you get a Win for different values of N. For few simulations, the results have high variance and the proportion of times you Win may not even be close to the expected values shown in Figure 1. An equilibrium is reached after somewhere around 750 simulations. 
+
+# 2) One from the best $k$ out of $N$ 
+
+As for the previous scenario, we let $m$ be our state variable, such that we have observed and rejected $m - 1$ candidates.
+
+Let us define a new finite set of elements $A$. $A$ is defined as we progress through the interviews. At state m, we will have $m - 1$ elements all ranked according to quality. 
+
+Our interviews can be viewed as independent trials, which we will represent with $A_{m}$. Where $m = 1, 2, ... N$
+
+At each state m, we define a variable $i$, which is equal to the rank of the $m^{th}$ candidate relative to the previous $m - 1$ candidates.
+
+Now we will determine the pay-off at each time period. If we make the decision to hire at state $m$, we will receive the pay-off $g_{m}(x_{m})$. If we interview all the candidates and do not hire anyone, we will receive a pay-off of $0$. 
+
+Let us define two probability values:  
+
+$p_{m}(i)$ is the probability of a candidate of quality $i$. It is easy to see that this can be calculated in the following manner.
+
+$$p_{m} (i) = \mathbf{P} \{x_{m} = i\} = \frac{1}{m}$$ 
+
+The above value is defined for $i \leq m$
+
+$g_{m}(i)$ is the probability that stopping at the element which is $i^{th}$ in quality among the first $m$, we will make a successful choice (a candidate among the best $k$). We can define it in the following manner. 
+
+$$g_{m}(i) = \sum_{j = i}^{k} \frac{\binom{i - 1}{j - 1} \binom{m - i}{N - j}}{\binom{m}{N}}$$ 
+
+The above value is for $i \leq k$ because for $i > k$ the probability of success is $0$. 
+
+We start by proving that:
+
+$$g_{m - 1}(i) \leq g_{m}(i) \leq g_{m + 1}(i)$$
+
+Note that $g_{m}$ is computed recursively by the following formula:
+
+$$g_{m - 1}(i) = P_{m}(i)g_{m}(i+1) + [1 - P_{m}(i)]g_{m}(i)$$
+
+where 
+
+$$P_{m}(i) = \mathbf{P} \{x_m \leq i\} = \sum_{j = 1}^{i}p_{m}(j)$$
+
+Let us now keep in mind that in the above formula if $a_{j}$ is $i^{th}$ in $a_{1}, a_{2}, .... a_{m - 1}$, then it is either $i^{th}$ or $i + 1^{th}$ among $a_{1}, a_{2}, .... a_{m}$. Let:  
+
+1) Event $O$ be the event where $a_{j}$ is $i^{th}$ in quality in $a_{1}, a_{2}, .... a_{m - 1}$.
+2) Event $I_{1}$ be the event where $a_{j}$ is $i^{th}$ in quality in $a_{1}, a_{2}, .... a_{m}$. 
+3) Event $I_{2}$ be the event where $a_{j}$ is $i + 1^{th}$ in quality in $a_{1}, a_{2}, .... a_{m}$.
+
+We can now define the following probabilities: 
+
+$$\mathbf{P}\{I_{2} | O\} = P_{m}(i)$$
+$$\mathbf{P}\{ I_{1} | O \} = 1 - P_{m}(i)$$
+
+From our definition, $g_m(i) > 0$ for all $i \leq k$ and $g_{m}(i) = 0$ for $i > k$. For any m, let 
+
+$$g_{m}(i) \leq g_{m}(i-1)$$
+
+By combining the above inequality and the recurrence formula, we have 
+
+$$g_{m - 1}(i) = P_{m}(i)g_{m}(i+1) + [1 - P_{m}(i)]g_{m}(i) \leq P_{m}(i - 1)g_{m}(i) + [1 - P_{m}(i) + 1]g_{m}(i - 1) = g_{m - 1}(i - 1)$$
+
+Further, we can conclude 
+
+$$g_{m - 1}(i) = P_m(i) g_{m}(i + 1) + [1 - P_{m}(i)]g_{m}(i) \leq g_{m}(i)$$
+
+Now, for a valid stopping rule, we need to define a monotonically decreasing function $E(m)$ such that it is recommended to stop at the first state $m$ where $E(m) \leq g_{m}(i)$
+
+Additionally, when we consider two states $m_{1}$ and $m_{2}$ such that $m_{1} \leq m_{2}$ and $g_{m_{1}}(i') \leq g_{m_{2}}(i'')$. Then if we should stop at $m_1$ for $i'$, then we should also stop at $m_2$ for $i''$.
+
+When we determine a stopping set $(m,i) \in \Gamma_{o}$ implies that one must stop when we have a candidate of quality $i$ at $m$. From our earlier definition with $m_{1}$ and $m_{2}$, we can extend this further to state that if $(m_{o}, i_{o}) \in \Gamma_{o}$ then $(m,i) \in \Gamma_{o}$ for all $m \geq m_{o}, i \leq i_{o}$. 
+
+We can assert that depending on our values of $k$ and $N$, there exist numbers 
+
+$$ 1 \leq s_{1} \leq s_{2} ........ \leq s_{k} \leq ..... \leq s_{n} \leq n$$
+
+The optimal stopping rule can be described in the following manner: 
+
+1) We pass all the elements $a_{1}, a_{2}, ... a_{s_{1} - 1}$
+
+2) We select the first of the elements $a_{s_{1}}, a_{s_{1} + 1},..... a_{s_{2} - 1}$ which is better than the preceding ones. If no such element exists, then move on to step 3. 
+
+3) We select the first of the elements $a_{s_{2}}, a_{s_{2} + 1}, .... a_{s_{3} - 1}$ which is surpassed by not more than one element that we have observed before. If no such element exists, move on to the next set of candidates. 
+
+We continue this process until we can find an element that satisfies the requirement. For expressing in a general step: 
+
+Find the element in $a_{s_{n}}, a_{s_{n} + 1}, .... , a_{s_{n+1} - 1}$ that is surpassed by a maximum of $n - 1$ elements observed before it. 
+
+Therefore, we will stop at the first state $m \geq s_{i}$. This by extension will prove that $s_{k + 1} = s_{k + 2} = .... = s_{n}$
+
+We will now move on to prove the existence of the function $E(m)$ and also study the limit behaviour of the numbers $s_{1}, s_{2} ...... s_{k}$ as $n \rightarrow \infty$
+
+For defining a stopping rule, for each of the states $m_{1}, m_{2}, ... m_{N}$, we need to exhibit values $i_{1}, i_{2}, ....., i_{m}$ for which we are stopping at state $m$. Therefore can define a set $\Gamma$ of pairs $(m,i)$ such that we stop at the first $m$ such that $(m,i_{m}) \in \Gamma$.
+
+There are two possible cases at state $m$:
+
+1) $g_{m} \geq E(m)$. In this case, stopping at $m$ gives a result no worse than continuining the interviews. 
+
+2) $g_{m} < E(m)$. In this case, it is advantageous not to stop and to use the optimal rule. 
+
+Therefore if at $m$, $g_{m} \geq E(m)$, then it is optimal to stop. If $g_{m} < E(m)$, then we would gain more by continuing to $m + 1$. Therefore:
+
+$$E(m - 1) = E(\max(E(m), g_{m}(i_{m})))$$
+
+This clearly proves:
+
+$$E(m) \leq E(m - 1)$$
+
+Which implies that $E(m)$ is a monotonically decreasing function. 
+
+Since:
+
+1) $E(m) \geq p_{N}(1) g_{N}(1) = \frac{1}{N}$ for $m < N$  
+
+2) $g_{m}(i) = 0$ for $i > k$
+
+For $m < k$ and $m > N$: $(m,i) \notin \Gamma_{o}$ 
+
+Hence $s_{k + 1} = s_{k + 2} = ...... = s_{N} = N$
+
+Our final objective is to derive the probability of success for the optimal strategy. 
+
+We will denote the probability with $p_{N}^{k}$.
+
+Let us consider a function $m_{o} = m_{o}(n)$ satisfying the condition $m_{o}(N)/N \rightarrow \sqrt[k]{\frac{1}{k}}$.
+
+We let $(m,i) \in \Gamma$ if $i \leq k, t > t_{o}(N)$. The set $\Gamma$ defines a stopping rule. Relying on the relation $\sum_{i = 1}^{k} g_{m}(i) = \frac{km}{N}$, we make a successful choice with the probability:
+
+$$\widetilde{p}_{N}^{k} = \sum_{m = m_{o} + 1}^{N} \frac{kt_{o}!(m - k - 1)!}{N(t_{o} - k)!(m - 1)!}$$
+
+Hence, for k > 1
+
+$$\lim_{N\rightarrow\infty} \widetilde{p}_{N}^{k} = \frac{k}{k - 1}\sqrt[k]{\frac{1}{k}} - \frac{1}{k -1}$$ 
+
+Since $1 \geq p_{N}^{k} \geq \widetilde{p}_{N}^{k}$ and $p_{N}^{k + 1} \geq p_{N}^{k}$, we have $\lim_{k,N\rightarrow\infty} p_{N}^{k} = 1$ 
+
+We set $p_{k} = \widetilde{p}_{N}^{k}, \epsilon_{i}(k) = \lim_{N\rightarrow\infty}\frac{s_{i}(N,k)}{N}$, if these limits exist. 
+
+For any $k$
+
+$$E(s_{k} - 1) > g_{s_{k} - 1}(k), E(s_{k}) \leq g_{s_{k}}(k)$$
+
+For $m + 1 \geq s_{k}(N,k)$
+
+$$E(m) = \sum_{s = m + 1}^{N} \frac{kt!(s - k - 1)!}{N(m - k)!(s - 1)!}$$
+
+$$g_m(k) = \frac{m!(N - k)!}{(m - k)!(N)!}$$
+
+Passing these to the limits, we obtain the following results
+
+For k = 1
+
+$$\epsilon_{1}(1) = e^{-1}$$
+
+For k > 1
+
+$$\epsilon_{k}(k) = \sqrt[k - 1]{\frac{k}{2k - 1}}$$
+
+Therefore, the algorithm for picking the one of the best k out of N candidates is as follows:
+
+1) Determine the initial observation period from state $m = 1$ to $s_{1}$ by picking by determining $s_{1}$ as:
+
+$$s_{1} = \frac{N}{e}$$
+
+2) Determine $s_{k}$ for $k \geq 2$ in by computing:
+
+$$s_{k} = \left(\sqrt[k - 1]{\frac{k}{2k - 1}}\right)*N$$
+
+3) Moving from state $m = 1$ use that stopping rule that after $s_{i}$ for $i \geq 1$, you will pick a candidate only if they are better than at least one of the $i$ best seen before. If no such candidate can be picked until $N$, then you hire the $N^{th}$ candidate. 
+
+``` {r, echo=FALSE, fig.width=7}
+n           <- 10000
+N           <- 100
+k_values    <- seq(1,10,1)
+prob_1_of_k <- rep(NA, length(k_values))
+
+for ( i in 1:length(k_values) ) {
+        
+    # set k 
+    k <- k_values[i]
+        
+    # set thresholds for given k
+    thresh <- N/exp(1)
+    if (k>1) {
+        for (j in 2:k) {
+            thresh <- c( thresh, ((j/(2*j-1))^(1/(j-1)))*N )
+        }
+    }
+    
+    rank_chosen <- rep(NA, n)
+    for (iter in 1:n) {
+        # randomise the order in which candidates are interviewed 
+        candidates <- sample(N, N)
+            
+        # find minimumn in observation set
+        best_so_far <- min( candidates[ 1:(floor( thresh[1] )) ] )
+        
+        # recursively run algorithm
+        if ( k > 1 ) {
+            for (t in 2:k) { #check we are subsetting candidates and not a simple 1:something vector
+                
+                # find best candidate in current interval
+                considered_candidates <- candidates[ (ceiling( thresh[t-1] )):(floor( thresh[t] )) ]
+                best_cand <- min( considered_candidates )
+                
+                # if candidate is better than (t-1)th best so far --> accept
+                if ( best_cand < max(best_so_far) ) {
+                    cand_no <- min( which(considered_candidates < max(best_so_far)) )
+                    rank_chosen[iter] <- considered_candidates[cand_no]
+                    break
+                # otherwise update the best so far to contain the best t candidates so far    
+                } else {
+                    best_so_far <- sort( candidates[ 1:(floor( thresh[t] )) ] )[1:t]
+                }
+            }
+        }
+        
+        # check final interval s_k:N if no candidate has been chosen yet
+        if ( is.na(rank_chosen[iter]) ) {
+            
+            # find best candidate
+            considered_candidates <- candidates[ (ceiling( thresh[k] )):N ]
+            best_cand <- min( considered_candidates )
+            
+            # if better than kth best so far --> accept
+            if ( best_cand < max(best_so_far) ) {
+                cand_no <- min( which(considered_candidates < max(best_so_far)) )
+                rank_chosen[iter] <- considered_candidates[cand_no] 
+            } else {
+                rank_chosen[iter] <- candidates[N]
+            }
+        }  
+    }
+    
+    # count how many times the candidate selected was actually in the top k
+    prob_1_of_k[i] <- mean( rank_chosen %in% 1:k )
+    
+}    
+
+
+### plots
+# 4. plot probability of a Win 
+df <- data.frame(k = k_values, prob = prob_1_of_k)
+ggplot( data=df, aes(x=k, y=prob) ) + 
+    geom_line( colour="coral", size=1.25 ) + 
+    geom_point( colour="coral", size=2.5 ) +
+    scale_x_continuous( breaks=seq(0, 10, 2), minor_breaks = seq(0, 10, 1) ) +
+    scale_y_continuous( breaks=seq(0, 1, 0.2), 
+                        name="proportion of times 1 of best k candidates picked" ) +
+    expand_limits(y=0) +
+    ggtitle( "One of the best k of N\n(N=100, 10 000 simulations)" ) +
+    theme( plot.title = element_text(size=12, margin=margin(t=10, b=10)),
+           axis.title.x = element_text(size=10, margin=margin(b=5, t=16)),
+           axis.text.x  = element_text(size=8),
+           axis.title.y = element_text(size=10, margin=margin(l=10, r=10)),
+           axis.text.y  = element_text(size=8) )
+```
+Figure 3. The above graph shows the probability of a Win for picking one of the best k candidates out of the total of 100. For k = 1, the probability is the same as that produced from the solution to the standard secretary problem. As k increases, the probability of a Win increases to 1. Note that these values are larger than asymptotic values since $\widetilde{p}_{N}^{k}$ is the expected probability of sucess as $N \rightarrow \infty$. 
+$\newline$
+
+# 3) The best k out of N 
+
+In this case, we have $N$ candidates and our objective is to hire the top-$k$ candidates. Under this scenario, a Win is defined as hiring exactly these candidates and we try to maximise the probability of this occuring. There are various approaches to solving this problem. We have decided to implement a fixed-threshold method, as put forward by Girdhar & Dudek (2009) [3]. 
+
+Under this approach, we use a single threshold in order to optimally select the top $k$ highest scoring candidates. The threshold is the maximum score obtained in the first $m$ candidates. Our objective, is to determine the optimum value of $m$, depending on $k$ and $N$. The best value of $m$ for the observation period is determined by maximizing the probability of success $\Phi(m)$.
+
+Let $S_{i}^{k}$ be the event that we have successfully selected all $k$ highest scoring candidates with the $i^{th}$ being the last one. Then the probability of success $\Phi^{k}(m)$ can be written as: 
+
+$$\Phi^{k}(m) = \sum_{i = m + k}^{N} P(S_i^{k})$$
+
+$$\Phi^{k}(m) = \sum_{i = m + k}^{N} \frac{k}{N} \frac{m}{i - 1} \frac{\binom{i - m - 1}{k - 1}}{\binom{N}{k - 1}}$$
+
+$$\Phi^{k}(m) = \frac{k}{N} \frac{m}{\binom{N}{ k - 1}} \sum_{i = m + k + 1}^{N - 1} \frac{\binom{i - m}{k - 1}}{i}$$
+
+Girdhar and Dudek [3] use simulations and heuristics to come up with the following expression for the optimal value of $m$:
+
+$$\frac{N}{k e^{1/k}}$$
+
+The algorithm for picking the top-k using a fixed threshold is therefore as follows:
+  
+1) Let $m^{*}(k) = \left \lceil{\frac{N}{k e^{1/k}}}\right \rceil$ be the observation or training interval. 
+    
+2) Find the threshold $t^{*} = \max(\{x_{1}, .... x_{m^{*}-1}\})$
+      
+3) Select each candidate from the interval $\{ m^{*}, ... N\}$ whose score is higher than the threshold until k candidates have been selected or we run out of candidates. 
+
+The probability of success using this method as $N \rightarrow \infty$ has been numerically approximated as: 
+  
+$$\Phi(m) = \frac{1}{ek}$$
+
+$\newline$
+``` {r, echo=FALSE}
+n           <- 10000
+N_values    <- 100
+k_values    <- seq(1,20, 1)
+prob_best_k <- rep(NA, length(k_values))
+
+for ( j in 1:length(k_values) ) {
+    
+    # set k
+    k <- k_values[j]
+    
+    # total number of candidates
+    #N <- N_values[j]
+    N <- N_values
+    
+    # calculate m*
+    m_crit <- N/(k*exp(1)^(1/k))
+    
+    #initialise matrix for saving the ranks of the chosen candidates
+    rank_chosen <- matrix( nrow=n, ncol=k )
+    
+    for (i in 1:n) {
+        # randomise the order in which candidates are interviewed 
+        candidates <- sample(N, N)
+        
+        # candidates interviewed after m*-1th candidate
+        considered_candidates   <- candidates[ceiling(m_crit):N]
+        
+        # score of best candidate up until and including m*-1th candidate
+        if ( m_crit < 1) {
+            threshold <- NULL
+        } else {
+            threshold <- min( candidates[1:floor(m_crit)] )
+        }
+        
+        # choose candidates:
+        # if m_crit is less than 1 (N=1 or N=2), take the first k candidates 
+        if ( is.null(threshold) ) {
+            rank_chosen[i,1:k] <- considered_candidates[1:k]
+            
+        # if k or more viable candidates exist (ie threshold >= k+1), employ first k of them
+        } else if ( sum(considered_candidates < threshold) >= k) {
+            for (t in 1:k) {
+                
+                #find first viable candidate in remaining candidates
+                cand_no <- min( which(considered_candidates < threshold) )
+                rank_chosen[i,t] <- considered_candidates[cand_no] 
+                
+                # update candidates interviewd afterwards
+                considered_candidates <- considered_candidates[-(1:cand_no)]
+            }
+            
+        # if less than k viable options exist (ie the threshold is <= k) it is impossible to hire the best k candidates 
+        } else {
+            # insert dummy values (that aren't 1:k)
+            rank_chosen[i,1:k] <- rep(100,k)
+        }
+        
+    }  
+    
+    # proportion of times the top k candidates were picked
+    prob_best_k[j] <- mean( apply(rank_chosen, 1, function(x) all(x %in% (1:k))) ) 
+}
+
+### plots
+# 3. plot probability of a Win 
+theoret_prob <- data.frame( k=k_values, probs=exp(-1)/k_values )
+df <- data.frame(k = k_values, prob = prob_best_k)
+ggplot( data=df, aes(x=k, y=prob) ) + 
+    geom_line( colour="coral", size=1.25 ) + 
+    geom_point( colour="coral", size=2.5 ) +
+    geom_line( data=theoret_prob, aes(x=k_values, y=probs), linetype="dashed" ) +
+    scale_x_continuous( breaks=seq(0, 20, 5) ) +
+    scale_y_continuous( breaks=seq(0,0.4, 0.05), 
+                        name="proportion of times best k candidates picked" ) +
+    ggtitle( "Best k of N\n(N=100, 10 000 simulations)" ) +
+    theme( plot.title = element_text(size=12, margin=margin(t=10, b=10)),
+           axis.title.x = element_text(size=10, margin=margin(b=5, t=16)),
+           axis.text.x  = element_text(size=8),
+           axis.title.y = element_text(size=10, margin=margin(l=10, r=10)),
+           axis.text.y  = element_text(size=8) )
+```
+
+Figure 4. The graph above displays the asymptotic (after 10,000 simulations) probability of a Win for N=100 and varying values of k. $\Phi(m)$ is represented by the dashed black line. The graph demonstrates that for a particular N, the probability of a Win decreases exponentially with increasing k.
+
+$\pagebreak$
+
+# References 
+
+[1]  M.J. Beckmann. Dynamic programming and the Secretary Problem.
+Computers and Mathematics
+with Applications, Pergamon Press
+, Vol. 19, No. 11, pages 25-28, 1990. 
+
+[2] Gusein-Zade, S.M. 1966. The problem of choice and the optimal stopping rule
+for a sequence of indpendent trials. Theory of Probability and its Applications
+11, 472-476.
+
+[3] Girdhar, Y.
+, & Dudek, G. (2009). Optimal Online Data Sampling or How to Hire the Best Secretaries. In CRV 09: Proceedings of the 2009 Canadian Conference on Computer and Robot Vision
+(pp. 292-298). Kelowna, British Columbia: IEEE Computer Society. 
